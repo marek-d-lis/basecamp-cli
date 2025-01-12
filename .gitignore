@@ -1,0 +1,30 @@
+# Go build artifacts
+/bin/
+/build/
+/*.exe
+*.out
+
+# IntelliJ / GoLand project files
+.idea/
+
+# Module dependencies
+/vendor/
+*.mod
+*.sum
+
+# Test cache and coverage files
+*.test
+*.cover
+*.prof
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary files and logs
+*.log
+*.tmp
+
+# Editors and IDEs
+.vscode/
+*.swp
