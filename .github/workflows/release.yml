@@ -1,51 +1,41 @@
-name: Build and Release BaseCamp
+name: Build and Release
 
 on:
   push:
     tags:
-      - "v*.*.*"  # Trigger only when a tag is pushed, e.g., v1.0.0
+      - "v*"
 
 jobs:
-  build:
-    name: Build for Multiple Platforms
+  release:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
-
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: "1.20"
+          go-version: "1.22"  # Match this to your go.mod file
 
-      - name: Build Binary
+      - name: Build BaseCamp CLI
         run: |
-          mkdir -p dist
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/basecamp-${{ matrix.goos }}-${{ matrix.goarch }}
+          go build -o basecamp
 
-      - name: Upload Binary as Artifact
+      - name: Archive Binary
+        run: |
+          mkdir -p release
+          mv basecamp release/basecamp
+          tar -czf release/basecamp-linux-amd64.tar.gz -C release basecamp
+
+      - name: Upload Release Asset
         uses: actions/upload-artifact@v3
         with:
-          name: basecamp-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/basecamp-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: basecamp-linux
+          path: release/basecamp-linux-amd64.tar.gz
 
-  release:
-    needs: build
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v3
-
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/*
+          files: release/basecamp-linux-amd64.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
